@@ -1,0 +1,384 @@
+import qualified Sound.Tidal.Tempo as T
+
+resetCyclesTo n = T.changeTempo (sTempoMV tidal) (\t tempo -> tempo {T.atTime = t, T.atCycle = n})
+
+setcps (110/60/4)
+
+all $ (|* gain 2.0)
+
+do
+  resetCyclesTo (-0.05)
+  let
+    clickpat = "[0~~0~~0~~~0~~~~~]"
+    chordpat = "[0 ~ ~ 0] [~] [0 ~ ~ 0] [~]"
+  d1
+    $ seqP [
+    (30, 32, (
+      (|* gain 0.69)
+      $ slow 2
+      $ stack [
+        s "~ ~ ~ [~ superhammondBend]"
+        # n "<d4,e4,a4,cs5>"
+        # sustainpedal "2"
+        # slide "-2"
+        # pan "0.6"
+        # gain 0.8
+      ]
+      # sustain 4.89
+      # voice 1
+      # room 0.2
+    )),
+    (32, 80, (
+      (|* gain 0.69)
+      $ slow 2
+      $ stack [
+        every' 2 0 (|+ n 7).(|* gain 0.95)
+        $ s "~ ~ ~ [~ superhammondBend]"
+        # n "<d4,e4,a4,cs5>"
+        # sustainpedal "2"
+        # slide "<2 -2>"
+        # pan "<0.4 0.6>"
+        # gain 0.8
+        ,
+        sometimesBy 0.6 (|+ n 12).(|* gain 0.8) $
+        every' 2 1 (|+ n 7).(|* gain 0.9)
+        $ s "~ superhammondBend superhammondBend superhammondBend"
+        # n "~ <e4> <a4> <cs4>"
+        # sustainpedal "0.25"
+        # slide "0 0 0.5 0"
+        # pan rand
+        # gain 0.8
+      ]
+      # sustain 4.89
+      # voice 1
+      # room 0.2
+    ))
+    ]
+  d2
+    $ seqP [
+    (16, 76, (
+      (|* gain 0.64)
+      $ slow 2
+      $ stut' 2 (3/32) ((|* gain 0.8).(|> lpf 1000).(|> pan (0)).(|> slide 0))
+      $ stut' 4 (3/16) ((|* gain 0.64).(|> lpf 1000).(|> pan (1)).(|> slide 0))
+      $ every' 8 4 (|> gain 0.9)
+      $ every' 8 6 (|> gain 0.9)
+      $ (|+ n 12)
+      $ s (fit 0 ["SinOscSynthBend"] chordpat)
+      # n "[<cs4,e5,a4> ~ ~ <d4,fs4,b4>] ~ [~ ~ ~ ~] ~"
+      # sustain 3.5
+      # pitch1 (range 2 3 $ slow 2 $ sine)
+      # sustainpedal "0.25"
+      # slide "[0.5 0 0 -0.5] [0] [0.4 0 0 -0.3] [0]"
+      # gain 0
+    ))
+    ]
+  d3
+    $ seqP [
+    (9, 10, (
+      fast (range 4 30 rand)
+      $ s "bubble" # n (range 0 10 rand) # speed (range 0.7 1.2 rand)
+      # pan (fast 1.5 rand)
+      # gain 0.55
+    )),
+    (11, 12, (
+      while "f t" (|* gain 0)
+      $ fast (range 4 30 rand)
+      $ s "bubble" # n (range 0 10 rand) # speed (range 0.7 1.2 rand)
+      # pan (fast 1.5 rand)
+      # gain 0.55
+    ))
+    ]
+  d4
+    $ seqP [
+    (20, 72, (
+      stack[
+        s "[~ gtrsingle:0/4] [[~ gtrsingle:0/4] ~]",
+        ((1/16) ~> ) $ s "[~ gtrsingle:0/4?] [[~ gtrsingle:0/4?] ~]"
+      ]
+      # gain 1.1
+      # cut 1
+      # speed "<1>"
+      # shape 0.5
+      # hpf 60 # hpq 0.9
+      # pan 0.7
+    ))
+    ]
+  d5
+    $ seqP [
+    (1, 2, s "tableware:8" # gain 1.5 # cut 1 # pan 0.7),
+    (4, 5, s "[~ tableware:14] [~] [~] [~]" # gain 1.5 # cut 1 # pan 0.6),
+    (6, 7, s "tableware:7 tableware:1 ~ ~" # gain 1.5 # cut 1 # pan "0.1 0.5 0.5 0.5"),
+    (10, 11, s "[~ tableware:0] [~] [~] [~]" # gain 1.5),
+    (14, 16, (
+      (|* gain 1.1)
+      -- $ (|> lpf (range 1100 2500 (slow 2 $ sine)))
+      $ (|> cut 1)
+      $ fast 4
+      $ swingBy (1/12) 8
+      $ someCyclesBy 0.7 (every' 24 23 (const $ s "[tableware tableware] run*4" # n (range 1 9 rand) # gain "1.1 [0.8 0.9 1.0 1.1]" # speed "-0.8 1" # pan "0.5 [0.8 0.6 0.4 0.2]"))
+      $ every' 8 7 (const $ s "[tableware tableware] bubble*4" # n (range 1 9 rand) # gain "1.1 [0.8 0.9 1.0 1.1]" # speed "-0.8 1" # pan "0.5 [0.2 0.4 0.6 0.8]")
+      $ sometimesBy 0.3 (jux(rev))
+      $ s "tableware [tableware cap/2]"
+      # n (range 0 20 rand)
+      # gain "1.0 [1.2 1.0]"
+      # cut 1
+    )),
+    (16, 88, (
+      (|* gain 1.1)
+      -- $ (|> lpf (range 1100 2500 (slow 2 $ sine)))
+      $ (|> cut 1)
+      $ fast 4
+      $ swingBy (1/12) 8
+      $ someCyclesBy 0.7 (every' 24 23 (const $ s "[tableware tableware] run*4" # n (range 1 9 rand) # gain "1.1 [0.8 0.9 1.0 1.1]" # speed "-0.8 1" # pan "0.5 [0.8 0.6 0.4 0.2]"))
+      $ every' 8 7 (const $ s "[tableware tableware] bubble*4" # n (range 1 9 rand) # gain "1.1 [0.8 0.9 1.0 1.1]" # speed "-0.8 1" # pan "0.5 [0.2 0.4 0.6 0.8]")
+      $ sometimesBy 0.3 (jux(rev))
+      $ s "tableware [tableware cap/2]"
+      -- # pan (range 0.4 0.6 rand)
+      # n (range 0 20 rand)
+      # gain "0.9 [1.1 1.0]"
+      # cut 1
+    ))
+    ]
+  d6
+    $ seqP [
+    (2, 3, s "ice:0" # gain 1.3 # cut 1 # pan 0.7),
+    (3, 4, s "soda:2" # gain 1.3 # cut 1 # pan 0.2),
+    (4, 5, s "~ soda:0" # gain 1.3 # cut 1 # pan 0.7),
+    (6, 7, s "~ cap:0" # gain 1.3 # cut 1),
+    (8, 9, s "[~ tableware:9] [~ tableware:6] [~ flick2:7] [~]" # pan "0.6 0.3 0.5 0.5" # cut 1 # gain "1.4 1.2"),
+    (10, 11, s "[~] [~ [~ foot:1]] [~ brushing:0] [~]" # gain "1.2 1.3" # cut 1 # pan "0.5 0.8"),
+    (11, 12, s "[~] [~] [~] [~ [~ [run:2 run:3]]]" # gain 1.3 # cut 1 # pan "[~] [~] [~] [~ [~ [0.4 0.2]]]"),
+    (12, 13, s "[~ tableware:3] [~ tableware:0] [~ flick2reverb:1] [~]" # pan "0.4 0.7 0.5 0.5" # cut 1 # gain "1.4 1.4"),
+    (16, 82, (
+      (|* gain 1.1)
+      -- $ (|> lpf (range 1200 2500 (slow 1.5 $ sine)))
+      $ (|> cut 1)
+      $ every' 16 15 (const (
+        s (fit 0 ["brushing","tableware","ice","ice","foot"] "4? ~ ~ 4 ~ 0? 0 0 0 0 1 1 2 2 3 3")
+        # pan "[0.5] [0.5 0.8 0.6 0.4]"
+        # gain "[0.83 0.85 0.9 0.95] [0.95 0.9 0.85 0.8]"
+        # speed "[1] [1 1 0.8 0.9]"
+        # n (range 0 9 rand)
+      ))
+      $ (|> n (range 0 10 rand))
+      $ fast 4
+      $ swingBy (1/12) 8
+      $ every' 3 0 (const (s "[foot ~] flick2/2" # pan (range 0.1 0.4 rand)))
+      $ every' 3 1 (const (s "ice/2 [~ soda/4]" # pan (range 0.6 0.9 rand)))
+      $ every' 3 2 (const (s "[~ brushing/2]" # gain 1 # pan (range 0.2 0.4 rand)))
+      $ s "~"
+    ))
+    ]
+  d7
+    $ seqP [
+    (16, 80, (
+      slow 2
+      $ (|* gain 0.87)
+      $ (|> shape 0.25)
+      $ (|> voice 2)
+      $ every' 2 0 (
+        const
+          $ s (fit 0 ["superhammondBend"] "0 ~ ~ 0  ~ ~ ~ 0*2  ~ ~ ~ ~  ~ ~ ~ ~")
+          # n "a1 a1 a1 d1" # sustain "0.25 0.125 0.25 0.9"
+      )
+      $ every' 4 1 (
+        const
+          $ s (fit 0 ["superhammondBend"] "~ ~ ~ 0  ~ ~ ~ 0*2  ~ ~ ~ ~  ~ ~ ~ ~")
+          # n "a1 a1 a1 d1" # sustain "0.25 0.125 0.25 0.9"
+      )
+      $ every' 4 3 (
+        const
+          $ s (fit 0 ["superhammondBend"] "~ ~ ~ 0  ~ ~ ~ 0*2  ~ ~ ~ ~  [~ 0] 0*2 ~ 0")
+          # gain "1  1  1  [[0 0.8] 1*2 1 1]"
+          # n "a1 a1 a1 [a3 e1]" # sustain "0.25 0.125 0.25 [[0.125 [0.125 0.38]] 0.25]"
+      )
+      $ s "~"
+    ))
+    ]
+  d8
+    $ seqP [
+    (32, 72, (
+      stut' 2 (1/4) ((|* gain 0.8).(|* lpf 0.9).(|> pan (1))) $ stut' 6 (1/2) ((|* gain 0.78).(|* lpf 0.9).(|> pan (0)))
+      $ s "808cy:2/16"
+      # pan "0.3"
+      # gain 1.0
+      # lpf (range 3000 3500 (slow 1.5 $ sine))
+    ))
+    ]
+  d9
+    $ seqP [
+    (3, 4, (
+      (|> hpf (range 200 500 (slow 3 $ sine)))
+      $ s (fit 0 ["superhammondBend"] "[~] [~] [~] [0 ~]")
+      # n "<a5,b5,e5>"
+      # voice 2
+      # room 0.05
+      # sustain (choose [0.06])
+      # gain 0.6
+      # pan rand
+    )),
+    (6, 7, (
+      while "[t] [f f t t]" (|* gain 0)
+      $ (|> hpf (range 200 500 (slow 3 $ sine)))
+      $ fast (choose [2,2,2,4])
+      $ sometimesBy 0.4 ((|+ n (choose [-7,-5])).(|* gain 1.15))
+      $ jux(rev)
+      $ s "superhammondBend*8"
+      # n "<a5,b5,e5>"
+      # voice (choose [1,2])
+      # room 0.05
+      # sustain (choose [0.02,0.021,0.023,0.07])
+      # gain 0.6
+      # pan rand
+    )),
+    (11, 12, (
+      while "[t] [f t t t]" (|* gain 0)
+      $ (|> hpf (range 200 500 (slow 3 $ sine)))
+      $ fast (choose [2,2,2,4])
+      $ sometimesBy 0.4 ((|+ n (choose [-7,-5])).(|* gain 1.15))
+      $ jux(rev)
+      $ s "superhammondBend*8"
+      # n "<a5,b5,e5>"
+      # voice (choose [1,2])
+      # room 0.05
+      # sustain (choose [0.02,0.021,0.023,0.07])
+      # gain 0.6
+      # pan rand
+    )),
+    (14, 15, (
+      while "[t f t t] [t]" (|* gain 0)
+      $ (|> hpf (range 200 500 (slow 3 $ sine)))
+      $ fast (choose [2,2,2,4])
+      $ sometimesBy 0.4 ((|+ n (choose [-7,-5])).(|* gain 1.15))
+      $ jux(rev)
+      $ s "superhammondBend*8"
+      # n "<a5,b5,e5>"
+      # voice (choose [1,2])
+      # room 0.05
+      # sustain (choose [0.02,0.021,0.023,0.07])
+      # gain 0.6
+      # pan rand
+    )),
+    (15, 16, (
+      while "[t t t f] [t t t t]" (|* gain 0)
+      $ (|> hpf (range 200 500 (slow 3 $ sine)))
+      $ fast (choose [2,2,2,4])
+      $ sometimesBy 0.4 ((|+ n (choose [-7,-5])).(|* gain 1.15))
+      $ jux(rev)
+      $ s "superhammondBend*8"
+      # n "<a5,b5,e5>"
+      # voice (choose [1,2])
+      # room 0.05
+      # sustain (choose [0.02,0.021,0.023,0.07])
+      # gain 0.6
+      # pan rand
+    )),
+    (20, 71, (
+      (|> hpf (range 200 500 (slow 3 $ sine)))
+      $ fast (choose [2,2,2,4])
+      $ sometimesBy 0.4 ((|+ n (choose [-7,-5])).(|* gain 1.15))
+      $ jux(rev)
+      $ s "superhammondBend*8"
+      # n "<a5,b5,e5>"
+      # voice (choose [1,2])
+      # room 0.05
+      # sustain (choose [0.02,0.021,0.023,0,0.07])
+      # gain 0.5
+      # pan (fast 1.5 rand)
+    ))
+    ]
+  d10 -- guitar
+    $ seqP [
+    (32, 33, (
+      stack [
+        s "guitar" # speed "1" # pan 0.3,
+        s "guitar" # speed "-1" # pan 0.7
+      ]
+      # gain 0.71
+    ))
+    ]
+  d11
+    $ seqP [
+    (14, 90, (
+      s "~ ~ [~ notes/4] ~" # gain 1.0 # room 0.5 # speed 1.6 # pan (choose [0.1,0.9]) # n 2
+    ))
+    ]
+  d12
+    $ seqP [
+    (13, 88, (
+      every' 4 3 (|> gain 0.67)
+      $ s "~ ~ ~ [~ ~ ~ superhammondBend]"
+      # voice 1 # n "e4" # sustain 0.17 # sustainpedal 0.3 # slide 2 # hpf 60 # hpq 0.3
+      # gain 0
+    )),
+    (88, 90, (
+      every' 2 1 (|> gain 0.67)
+      $ s "~ ~ ~ [~ ~ ~ superhammondBend]"
+      # voice 1 # n "e4" # sustain 0.17 # sustainpedal 0.3 # slide 2 # hpf 60 # hpq 0.3
+      # gain 0
+    ))
+    ]
+  d13
+    $ seqP [
+    (16, 90, (
+      fast 4
+      $ (|- n 7)
+      $ s "~ SinOscSynthBend"
+      # n "<af4,af5,af6>" # hpf 700 # lpf 800
+      # sustain 0.05
+      # pan rand
+      # gain (range 0.6 0.9 rand)
+    ))
+    ]
+  d14
+    $ seqP [
+    (18, 20, (
+      while "t t t f" (|* gain 0)
+      $ slow 2
+      $ ((1/16) ~>)
+      $ s (fit 0 ["superfm"] clickpat)
+      # n "<a5,b5,e5>"
+      # hpf 700 # lpf 800
+      # slide (choose [0.5,1,0])
+      -- # sustain 0.7
+      # sustain 0.3
+      # sustainpedal 0.25
+      # pan rand
+      # gain (fit 0 [0.55,0] clickpat)
+    )),
+    (20, 90, (
+      slow 2
+      $ ((1/16) ~>)
+      $ s (fit 0 ["superfm"] clickpat)
+      # n "<a5,b5,e5>"
+      # hpf 700 # lpf 800
+      # slide (choose [0.5,1,0])
+      -- # sustain 0.7
+      # sustain 0.3
+      # sustainpedal 0.25
+      # pan rand
+      # gain (fit 0 [0.55,0] clickpat)
+    ))
+    ]
+  d15 -- background
+    $ seqP [
+    (0, 0, s "livingroom:0" # gain 0.8),
+    (12, 13, (
+      while "[t] [t t t f]" (|* gain 0)
+      $ fast (range 5 6 rand)
+      $ s "SinOscSynthBend*8"
+      # n (choose [2,3,4,5])
+      # sustain (range 0.0004 0.0006 rand)
+      # pan (fast 1.5 rand)
+      # gain 1.1
+    )),
+    (14, 90, (
+      fast (range 5 8 rand)
+      $ s "SinOscSynthBend*8"
+      # n (choose [2,3,4,5])
+      # sustain (range 0.0004 0.0006 rand)
+      # pan (fast 1.5 rand)
+      # gain 1.1
+    ))
+    ]
